@@ -78,6 +78,9 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
       if ([arguments[@"badge"] boolValue]) {
         authOptions |= UNAuthorizationOptionBadge;
       }
+      if ([arguments[@"critical"] boolValue]) {
+        authOptions |= UNAuthorizationOptionCritical;
+      }
 
       NSNumber *isAtLeastVersion12;
       if (@available(iOS 12, *)) {
@@ -107,6 +110,8 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
                                                                       UNNotificationSettingEnabled],
                                   @"alert" : [NSNumber numberWithBool:settings.alertSetting ==
                                                                       UNNotificationSettingEnabled],
+                                  @"critical" : [NSNumber numberWithBool:settings.criticalSetting ==
+                                                                      UNNotificationSettingEnabled],
                                   @"provisional" :
                                       [NSNumber numberWithBool:granted && [provisional boolValue] &&
                                                                isAtLeastVersion12],
@@ -128,6 +133,9 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
       }
       if ([arguments[@"badge"] boolValue]) {
         notificationTypes |= UIUserNotificationTypeBadge;
+      }
+      if ([arguments[@"critical"] boolValue]) {
+        notificationTypes |= UIUserNotificationTypeCritical;
       }
 
       UIUserNotificationSettings *settings =
@@ -293,6 +301,7 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
     @"sound" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeSound],
     @"badge" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeBadge],
     @"alert" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeAlert],
+    @"critical" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeCritical],
     @"provisional" : [NSNumber numberWithBool:NO],
   };
   [_channel invokeMethod:@"onIosSettingsRegistered" arguments:settingsDictionary];

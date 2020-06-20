@@ -209,6 +209,7 @@ class IosNotificationSettings {
     this.sound = true,
     this.alert = true,
     this.badge = true,
+    this.critical = false,
     this.provisional = false,
   });
 
@@ -216,11 +217,13 @@ class IosNotificationSettings {
       : sound = settings['sound'],
         alert = settings['alert'],
         badge = settings['badge'],
+        critical = settings['critical'],
         provisional = settings['provisional'];
 
   final bool sound;
   final bool alert;
   final bool badge;
+  final bool critical;
   final bool provisional;
 
   @visibleForTesting
@@ -229,6 +232,7 @@ class IosNotificationSettings {
       'sound': sound,
       'alert': alert,
       'badge': badge,
+      'critical': critical,
       'provisional': provisional
     };
   }
