@@ -78,14 +78,14 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
       if ([arguments[@"badge"] boolValue]) {
         authOptions |= UNAuthorizationOptionBadge;
       }
-      if ([arguments[@"critical"] boolValue]) {
-        authOptions |= UNAuthorizationOptionCritical;
-      }
 
       NSNumber *isAtLeastVersion12;
       if (@available(iOS 12, *)) {
         isAtLeastVersion12 = [NSNumber numberWithBool:YES];
         if ([provisional boolValue]) authOptions |= UNAuthorizationOptionProvisional;
+        if ([arguments[@"critical"] boolValue]) {
+            authOptions |= UNAuthorizationOptionCriticalAlert;
+        }
       } else {
         isAtLeastVersion12 = [NSNumber numberWithBool:NO];
       }
@@ -103,21 +103,37 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
                           [[UNUserNotificationCenter currentNotificationCenter]
                               getNotificationSettingsWithCompletionHandler:^(
                                   UNNotificationSettings *_Nonnull settings) {
-                                NSDictionary *settingsDictionary = @{
-                                  @"sound" : [NSNumber numberWithBool:settings.soundSetting ==
-                                                                      UNNotificationSettingEnabled],
-                                  @"badge" : [NSNumber numberWithBool:settings.badgeSetting ==
-                                                                      UNNotificationSettingEnabled],
-                                  @"alert" : [NSNumber numberWithBool:settings.alertSetting ==
-                                                                      UNNotificationSettingEnabled],
-                                  @"critical" : [NSNumber numberWithBool:settings.criticalSetting ==
-                                                                      UNNotificationSettingEnabled],
-                                  @"provisional" :
-                                      [NSNumber numberWithBool:granted && [provisional boolValue] &&
-                                                               isAtLeastVersion12],
-                                };
-                                [self->_channel invokeMethod:@"onIosSettingsRegistered"
-                                                   arguments:settingsDictionary];
+                              if (@available(iOS 12.0, *)) {
+                                  NSDictionary *settingsDictionary = @{
+                                      @"sound" : [NSNumber numberWithBool:settings.soundSetting ==
+                                                  UNNotificationSettingEnabled],
+                                      @"badge" : [NSNumber numberWithBool:settings.badgeSetting ==
+                                                  UNNotificationSettingEnabled],
+                                      @"alert" : [NSNumber numberWithBool:settings.alertSetting ==
+                                                  UNNotificationSettingEnabled],
+                                      @"critical" : [NSNumber numberWithBool:settings.criticalAlertSetting ==
+                                                     UNNotificationSettingEnabled],
+                                      @"provisional" :
+                                          [NSNumber numberWithBool:granted && [provisional boolValue] &&
+                                           isAtLeastVersion12],
+                                  };
+                                  [self->_channel invokeMethod:@"onIosSettingsRegistered"
+                                                     arguments:settingsDictionary];
+                              } else {
+                                 NSDictionary *settingsDictionary = @{
+                                      @"sound" : [NSNumber numberWithBool:settings.soundSetting ==
+                                                  UNNotificationSettingEnabled],
+                                      @"badge" : [NSNumber numberWithBool:settings.badgeSetting ==
+                                                  UNNotificationSettingEnabled],
+                                      @"alert" : [NSNumber numberWithBool:settings.alertSetting ==
+                                                  UNNotificationSettingEnabled],
+                                      @"provisional" :
+                                          [NSNumber numberWithBool:granted && [provisional boolValue] &&
+                                           isAtLeastVersion12],
+                                  };
+                                  [self->_channel invokeMethod:@"onIosSettingsRegistered"
+                                                     arguments:settingsDictionary];
+                              }
                               }];
                           result([NSNumber numberWithBool:granted]);
                         }];
@@ -134,9 +150,7 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
       if ([arguments[@"badge"] boolValue]) {
         notificationTypes |= UIUserNotificationTypeBadge;
       }
-      if ([arguments[@"critical"] boolValue]) {
-        notificationTypes |= UIUserNotificationTypeCritical;
-      }
+
 
       UIUserNotificationSettings *settings =
           [UIUserNotificationSettings settingsForTypes:notificationTypes categories:nil];
@@ -301,7 +315,7 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
     @"sound" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeSound],
     @"badge" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeBadge],
     @"alert" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeAlert],
-    @"critical" : [NSNumber numberWithBool:notificationSettings.types & UIUserNotificationTypeCritical],
+    @"critical" : [NSNumber numberWithBool:NO],
     @"provisional" : [NSNumber numberWithBool:NO],
   };
   [_channel invokeMethod:@"onIosSettingsRegistered" arguments:settingsDictionary];
