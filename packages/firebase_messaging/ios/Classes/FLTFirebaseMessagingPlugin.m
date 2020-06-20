@@ -304,7 +304,19 @@ static NSObject<FlutterPluginRegistrar> *_registrar;
   [[FIRMessaging messaging] setAPNSToken:deviceToken type:FIRMessagingAPNSTokenTypeProd];
 #endif
 
-  [_channel invokeMethod:@"onToken" arguments:[FIRMessaging messaging].FCMToken];
+    NSString *deviceTokenString = [self createDeviceTokenString:deviceToken];
+  [_channel invokeMethod:@"onToken" arguments:deviceTokenString];
+}
+
+- (NSString*) createDeviceTokenString:(NSData*) deviceToken {
+    const unsigned char *tokenChars = deviceToken.bytes;
+    
+    NSMutableString *tokenString = [NSMutableString string];
+    for (int i=0; i < deviceToken.length; i++) {
+        NSString *hex = [NSString stringWithFormat:@"%02x", tokenChars[i]];
+        [tokenString appendString:hex];
+    }
+    return tokenString;
 }
 
 // This will only be called for iOS < 10. For iOS >= 10, we make this call when we request
